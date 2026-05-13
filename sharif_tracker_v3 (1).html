@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="শরিফ ট্র্যাকার">
+<title>শরিফ ডিস্ট্রিবিউশন</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#1e3a8a;--blue2:#3b82f6;--green:#059669;--red:#dc2626;
+  --amber:#d97706;--purple:#7c3aed;--border:#e2e8f0;
+  --text:#1e293b;--muted:#64748b;--bg:#f0f4ff;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Noto Sans Bengali,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.hdr{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:14px 16px 10px;position:sticky;top:0;z-index:200}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.hdr h1{font-size:14px;font-weight:700;line-height:1.3}
+.hdr p{font-size:10px;opacity:.8;margin-top:1px}
+.call-btn{background:rgba(255,255,255,.2);border:none;color:#fff;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;text-decoration:none;white-space:nowrap}
+.call-btn svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;flex-shrink:0}
+.page{display:none;padding:12px 12px 76px;animation:fi .2s ease}
+.page.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+/* NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(6,1fr);z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.nb{display:flex;flex-direction:column;align-items:center;padding:7px 2px;border:none;background:transparent;cursor:pointer;color:var(--muted);font-size:9px;gap:2px}
+.nb svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+.nb.active{color:var(--blue2);font-weight:700}
+/* CARDS */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.metric{border-radius:12px;padding:13px;color:#fff}
+.metric h3{font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.4px}
+.metric .v{font-size:20px;font-weight:800;margin:3px 0;line-height:1}
+.metric .s{font-size:11px;opacity:.8}
+.m1{background:linear-gradient(135deg,#1d4ed8,#3b82f6)}
+.m2{background:linear-gradient(135deg,#047857,#10b981)}
+.m3{background:linear-gradient(135deg,#b45309,#f59e0b)}
+.m4{background:linear-gradient(135deg,#6d28d9,#8b5cf6)}
+/* BOX */
+.box{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.bt{font-size:13px;font-weight:700;margin-bottom:11px;display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+/* FORM */
+.fg{display:flex;flex-direction:column;gap:3px;margin-bottom:9px}
+label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+input,select,textarea{padding:10px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;color:var(--text);background:#fafafa;width:100%;outline:none;transition:.15s;font-family:inherit}
+input:focus,select:focus{border-color:var(--blue2);background:#fff}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+/* RESULT */
+.rbox{background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:11px;margin-bottom:11px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.ri{text-align:center}
+.rl{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase}
+.rv{font-size:17px;font-weight:800;margin-top:2px}
+/* BUTTONS */
+.btn{border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;width:100%;transition:.15s;font-family:inherit}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff}
+.btn-sm{border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-del{background:#fee2e2;color:#991b1b}
+.btn-save{background:#d1fae5;color:#065f46}
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:#f8fafc;padding:7px 5px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--border)}
+.tbl td{padding:9px 5px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.tbl tr:last-child td{border:none}
+/* PILLS */
+.pill{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700}
+.pg{background:#d1fae5;color:#065f46}
+.pr{background:#fee2e2;color:#991b1b}
+.pb{background:#dbeafe;color:#1d4ed8}
+.pa{background:#fef3c7;color:#92400e}
+.pp{background:#ede9fe;color:#5b21b6}
+/* STOCK */
+.stock-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9}
+.stock-item:last-child{border:none}
+.stock-bar{height:6px;background:#e2e8f0;border-radius:3px;margin-top:4px;overflow:hidden}
+.stock-fill{height:100%;border-radius:3px;transition:width .3s}
+/* EMP */
+.ecard{background:#fff;border-radius:12px;padding:13px;margin-bottom:9px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.eavatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
+/* TABS */
+.rtabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.rtab{padding:7px 13px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-size:12px;cursor:pointer;font-weight:600;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.rtab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* PORTAL */
+.phdr{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border-radius:14px;padding:14px;margin-bottom:12px}
+/* MISC */
+.loading{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--blue2);border-radius:50%;animation:spin .6s linear infinite;margin-bottom:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:9px 18px;border-radius:30px;font-size:12px;font-weight:600;display:none;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);white-space:nowrap}
+.empty{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+.sum-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px}
+.si{background:#f8fafc;border-radius:8px;padding:9px;text-align:center}
+.sl{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase}
+.sv{font-size:15px;font-weight:800;margin-top:2px}
+hr{border:none;border-top:1px solid var(--border);margin:11px 0}
+.alert-badge{background:#fee2e2;color:#991b1b;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700}
+.owner-info{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-row">
+    <div>
+      <h1>🏪 মেসার্স শরিফ ডিস্ট্রিবিউশন হাউস</h1>
+      <p id="hdr-date">টিস্যু ডিলারশীপ ট্র্যাকার</p>
+    </div>
+    <a href="tel:01700000000" id="call-owner" class="call-btn">
+      <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      মালিক
+    </a>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="pg-home" class="page active">
+  <div class="metrics">
+    <div class="metric m1"><h3>আজকের বিক্রি</h3><div class="v" id="hm1">৳০</div><div class="s" id="hm1s">০ পিস</div></div>
+    <div class="metric m2"><h3>আজকের লাভ</h3><div class="v" id="hm2">৳০</div><div class="s" id="hm2s">মার্জিন ০%</div></div>
+    <div class="metric m3"><h3>মাসিক বিক্রি</h3><div class="v" id="hm3">৳০</div><div class="s" id="hm3s">লাভ ৳০</div></div>
+    <div class="metric m4"><h3>মোট এন্ট্রি</h3><div class="v" id="hm4">০</div><div class="s">সব লেনদেন</div></div>
+  </div>
+  <div class="box">
+    <div class="bt"><span class="dot" style="background:var(--red)"></span> স্টক সতর্কতা <span id="stock-alert-cnt" class="alert-badge" style="display:none">!</span></div>
+    <div id="home-stock-alert"><div class="loading"><div class="spin"></div></div></div>
+  </div>
+  <div class="box">
+    <div class="bt"><span class="dot" style="background:var(--blue2)"></span> সর্বশেষ লেনদেন</div>
+    <div id="home-recent"><div class="loading"><div class="spin"></div></div></div>
+  </div>
+</div>
+
+<!-- SALE -->
+<div id="pg-sale" class="page">
+  <div class="box">
+    <div class="bt"><span class="dot" style="background:#10b981"></span> নতুন বিক্রি এন্ট্রি</div>
+    <div class="frow">
+      <div class="fg"><label>তারিখ</label><input type="date" id="s-date"></div>
+      <div class="fg"><label>কর্মচারী</label><select id="s-emp"><option value="নিজে">নিজে</option></select></div>
+    </div>
+    <div class="fg"><label>প্রোডাক্ট</label>
+      <select id="s-prod" onchange="autoPrice()">
+        <option value="">বেছে নিন</option>
+        <option value="Toylet White|18.50">Toylet White — ৳১৮.৫০</option>
+        <option value="Toylet Gold Red|25.50">Toylet Gold Red — ৳২৫.৫০</option>
+        <option value="Toylet Red Super|23.50">Toylet Red Super — ৳২৩.৫০</option>
+        <option value="150 Hand Towel Cleaner|28.50">150 Hand Towel Cleaner — ৳২৮.৫০</option>
+        <option value="150 Hand Towel Premium|32.50">150 Hand Towel Premium — ৳৩২.৫০</option>
+        <option value="150 Hand Towel High|33.50">150 Hand Towel High — ৳৩৩.৫০</option>
+        <option value="Toylet Napkin|44.50">Toylet Napkin — ৳৪৪.৫০</option>
+        <option value="Touch & Tech|42.00">Touch &amp; Tech — ৳৪২.০০</option>
+        <option value="250 Super|57.00">250 Super — ৳৫৭.০০</option>
+      </select>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>পরিমাণ (পিস)</label><input type="number" id="s-qty" value="1" min="1" oninput="calc()"></div>
+      <div class="fg"><label>বাজার / গ্রাহক</label><input type="text" id="s-cust" placeholder="দোকান/বাজার"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>ক্রয়মূল্য/পিস ৳</label><input type="number" id="s-buy" placeholder="কিনেছেন" oninput="calc()"></div>
+      <div class="fg"><label>বিক্রয়মূল্য/পিস ৳</label><input type="number" id="s-sell" placeholder="বেচেছেন" oninput="calc()"></div>
+    </div>
+    <div class="rbox">
+      <div class="ri"><div class="rl">মোট বিক্রি</div><div class="rv" style="color:#2563eb" id="r-t">৳০</div><div style="font-size:9px;color:var(--muted)">বিক্রয়×পরিমাণ</div></div>
+      <div class="ri"><div class="rl">মালের খরচ</div><div class="rv" style="color:var(--red)" id="r-c">৳০</div><div style="font-size:9px;color:var(--muted)">ক্রয়×পরিমাণ</div></div>
+      <div class="ri"><div class="rl">লাভ</div><div class="rv" style="color:var(--green)" id="r-p">৳০</div><div style="font-size:9px;color:var(--muted)">বিক্রি−খরচ</div></div>
+    </div>
+    <button class="btn btn-primary" onclick="addSale()" id="sale-btn">✅ বিক্রি সেভ করুন</button>
+  </div>
+  <div class="box">
+    <div class="bt"><span class="dot" style="background:var(--amber)"></span> আজকের তালিকা <span class="pill pa" id="today-cnt">০</span></div>
+    <div id="today-list"><div class="loading"><div class="spin"></div></div></div>
+  </div>
+</div>
+
+<!-- REPORT -->
+<div id="pg-report" class="page">
+  <div class="rtabs">
+    <button class="rtab active" onclick="setRep('today',this)">আজকের</button>
+    <button class="rtab" onclick="setRep('week',this)">এই সপ্তাহ</button>
+    <button class="rtab" onclick="setRep('month',this)">এই মাস</button>
+    <button class="rtab" onclick="setRep('all',this)">সব সময়</button>
+  </div>
+  <div class="box">
+    <div class="sum-row" id="rep-summary"><div class="loading" style="grid-column:1/-1"><div class="spin"></div></div></div>
+    <hr>
+    <div class="bt" style="margin-top:4px"><span class="dot" style="background:var(--purple)"></span> প্রোডাক্টভিত্তিক</div>
+    <div id="rep-prod"></div>
+    <hr>
+    <div class="bt"><span class="dot" style="background:var(--blue2)"></span> কর্মচারীভিত্তিক</div>
+    <div id="rep-emp"></div>
+  </div>
+</div>
+
+<!-- STOCK -->
+<div id="pg-stock" class="page">
+  <div class="box">
+    <div class="bt"><span class="dot" style="background:var(--green)"></span> স্টক আপডেট করুন</div>
+    <div id="stock-list"><div class="loading"><div class="spin"></div></div></div>
+    <hr>
+    <button class="btn btn-primary" onclick="saveStock()" id="stock-save-btn" style="margin-top:4px">💾 স্টক সেভ করুন</button>
+  </div>
+</div>
+
+<!-- EMP -->
+<div id="pg-emp" class="page">
+  <div class="owner-info">
+    <div style="font-size:28px">👤</div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#1d4ed8" id="owner-name-show">মালিক: —</div>
+      <div style="font-size:11px;color:var(--muted)" id="owner-phone-show">ফোন: —</div>
+      <button onclick="editOwner()" style="background:none;border:none;color:var(--blue2);font-size:11px;cursor:pointer;padding:0;margin-top:2px;font-weight:700">✏️ পরিবর্তন করুন</button>
+    </div>
+  </div>
+  <div class="box" id="owner-edit-box" style="display:none">
+    <div class="bt"><span class="dot" style="background:var(--amber)"></span> মালিকের তথ্য সেট করুন</div>
+    <div class="frow">
+      <div class="fg"><label>মালিকের নাম</label><input type="text" id="owner-name" placeholder="শরিফ সাহেব"></div>
+      <div class="fg"><label>মোবাইল নম্বর</label><input type="tel" id="owner-phone" placeholder="01XXXXXXXXX"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveOwner()">💾 সেভ করুন</button>
+  </div>
+  <div class="box">
+    <div class="bt"><span class="dot" style="background:var(--purple)"></span> কর্মচারী যোগ করুন</div>
+    <div class="frow">
+      <div class="fg"><label>নাম</label><input type="text" id="e-name" placeholder="পুরো নাম"></div>
+      <div class="fg"><label>পদ</label>
+        <select id="e-role">
+          <option value="মার্কেটার">মার্কেটার</option>
+          <option value="SR">SR</option>
+          <option value="ডেলিভারি">ডেলিভারি</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>মোবাইল</label><input type="tel" id="e-phone" placeholder="01XXXXXXXXX"></div>
+      <div class="fg"><label>এলাকা/রুট</label><input type="text" id="e-area" placeholder="মিরপুর-১০"></div>
+    </div>
+    <div class="fg"><label>পোর্টাল পিন (৪ সংখ্যা)</label><input type="number" id="e-pin" placeholder="1234" maxlength="4"></div>
+    <button class="btn btn-primary" onclick="addEmp()" id="emp-add-btn">+ কর্মচারী যোগ করুন</button>
+  </div>
+  <div id="emp-list"><div class="loading"><div class="spin"></div></div></div>
+</div>
+
+<!-- PORTAL -->
+<div id="pg-portal" class="page">
+  <div id="portal-login">
+    <div class="box" style="text-align:center;padding:24px">
+      <div style="font-size:44px;margin-bottom:10px">📱</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:3px">কর্মচারী পোর্টাল</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:18px">পিন দিয়ে ঢুকুন</div>
+      <div class="fg"><label>আপনার নাম</label><select id="pt-emp-sel"><option value="">— বেছে নিন —</option></select></div>
+      <div class="fg"><label>পিন</label><input type="password" id="pt-pin" maxlength="4" placeholder="● ● ● ●" style="letter-spacing:10px;font-size:20px;text-align:center"></div>
+      <button class="btn btn-primary" style="margin-top:8px" onclick="portalLogin()">🔐 প্রবেশ করুন</button>
+      <div id="portal-owner-call" style="margin-top:14px;display:none">
+        <a id="portal-call-link" href="#" class="call-btn" style="justify-content:center;background:linear-gradient(135deg,#047857,#10b981);display:flex">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="#fff" fill="none" stroke-width="2"/></svg>
+          মালিককে কল করুন
+        </a>
+      </div>
+    </div>
+  </div>
+  <div id="portal-main" style="display:none">
+    <div class="phdr">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:15px;font-weight:700" id="pt-name">—</div>
+          <div style="font-size:11px;opacity:.8;margin-top:2px" id="pt-role">—</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <a id="pt-call-btn" href="#" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:7px 12px;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;text-decoration:none;display:flex;align-items:center;gap:4px">
+            <svg width="13" height="13" viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.01 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>কল
+          </a>
+          <button onclick="portalLogout()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:7px 12px;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px">বের হন</button>
+        </div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bt"><span class="dot" style="background:var(--blue2)"></span> বিক্রির আপডেট দিন</div>
+      <div class="fg"><label>প্রোডাক্ট</label>
+        <select id="pt-prod" onchange="ptAutoPrice()">
+          <option value="">বেছে নিন</option>
+          <option value="Toylet White|18.50">Toylet White — ৳১৮.৫০</option>
+          <option value="Toylet Gold Red|25.50">Toylet Gold Red — ৳২৫.৫০</option>
+          <option value="Toylet Red Super|23.50">Toylet Red Super — ৳২৩.৫০</option>
+          <option value="150 Hand Towel Cleaner|28.50">150 Hand Towel Cleaner — ৳২৮.৫০</option>
+          <option value="150 Hand Towel Premium|32.50">150 Hand Towel Premium — ৳৩২.৫০</option>
+          <option value="150 Hand Towel High|33.50">150 Hand Towel High — ৳৩৩.৫০</option>
+          <option value="Toylet Napkin|44.50">Toylet Napkin — ৳৪৪.৫০</option>
+          <option value="Touch & Tech|42.00">Touch &amp; Tech — ৳৪২.০০</option>
+          <option value="250 Super|57.00">250 Super — ৳৫৭.০০</option>
+        </select>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>পরিমাণ (পিস)</label><input type="number" id="pt-qty" value="1" min="1" oninput="ptCalc()"></div>
+        <div class="fg"><label>বাজার/গ্রাহক</label><input type="text" id="pt-cust" placeholder="দোকান"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>ক্রয়মূল্য/পিস ৳</label><input type="number" id="pt-buy" placeholder="কিনেছেন" oninput="ptCalc()"></div>
+        <div class="fg"><label>বিক্রয়মূল্য/পিস ৳</label><input type="number" id="pt-sell" oninput="ptCalc()"></div>
+      </div>
+      <div class="rbox">
+        <div class="ri"><div class="rl">মোট বিক্রি</div><div class="rv" style="color:#2563eb" id="pt-rt">৳০</div></div>
+        <div class="ri"><div class="rl">মালের খরচ</div><div class="rv" style="color:var(--red)" id="pt-rc">৳০</div></div>
+        <div class="ri"><div class="rl">লাভ</div><div class="rv" style="color:var(--green)" id="pt-rp">৳০</div></div>
+      </div>
+      <button class="btn btn-primary" onclick="ptSubmit()" id="pt-btn">📤 আপডেট পাঠান</button>
+    </div>
+    <div class="box">
+      <div class="bt"><span class="dot" style="background:var(--amber)"></span> আমার আজকের বিক্রি</div>
+      <div id="pt-my-sales"><div class="loading"><div class="spin"></div></div></div>
+      <p style="font-size:10px;color:var(--muted);margin-top:8px">🔒 লাভের তথ্য শুধু মালিক দেখবেন</p>
+    </div>
+  </div>
+</div>
+
+<nav class="bnav">
+  <button class="nb active" onclick="goPage('home',this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>হোম</button>
+  <button class="nb" onclick="goPage('sale',this)"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>বিক্রি</button>
+  <button class="nb" onclick="goPage('report',this)"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>রিপোর্ট</button>
+  <button class="nb" onclick="goPage('stock',this)"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>স্টক</button>
+  <button class="nb" onclick="goPage('emp',this)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>কর্মচারী</button>
+  <button class="nb" onclick="goPage('portal',this)"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>পোর্টাল</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const API='https://script.google.com/macros/s/AKfycbyVRlXqBciwSHUdyQ6zI1baw7aC2I30nRMlr-ORHWilUcluhRzOo8yVkFFDwyw8rwWv/exec';
+const COLORS=['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#ec4899'];
+
+// ── OWNER INFO (local) ───────────────────────────
+function loadOwnerInfo(){
+  const name=localStorage.getItem('owner_name')||'';
+  const phone=localStorage.getItem('owner_phone')||'';
+  document.getElementById('owner-name-show').textContent='মালিক: '+(name||'সেট করুন');
+  document.getElementById('owner-phone-show').textContent='ফোন: '+(phone||'—');
+  if(phone){
+    document.getElementById('call-owner').href='tel:'+phone;
+    document.getElementById('portal-call-link').href='tel:'+phone;
+    document.getElementById('portal-call-link').parentElement.style.display='block';
+  }
+  if(document.getElementById('owner-name'))document.getElementById('owner-name').value=name;
+  if(document.getElementById('owner-phone'))document.getElementById('owner-phone').value=phone;
+}
+function editOwner(){
+  const b=document.getElementById('owner-edit-box');
+  b.style.display=b.style.display==='none'?'block':'none';
+}
+function saveOwner(){
+  const n=document.getElementById('owner-name').value.trim();
+  const p=document.getElementById('owner-phone').value.trim();
+  if(!n||!p){toast('নাম ও ফোন নম্বর দিন',false);return;}
+  localStorage.setItem('owner_name',n);
+  localStorage.setItem('owner_phone',p);
+  loadOwnerInfo();
+  document.getElementById('owner-edit-box').style.display='none';
+  toast('✅ মালিকের তথ্য সেভ হয়েছে');
+}
+
+// ── UTILS ─────────────────────────────────────────
+const now=new Date();
+document.getElementById('s-date').value=now.toISOString().split('T')[0];
+document.getElementById('hdr-date').textContent=now.toLocaleDateString('bn-BD',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+function td(){return new Date().toISOString().split('T')[0]}
+function fmt(n){return '৳'+(parseFloat(n)||0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',')}
+function fmtd(n){return '৳'+(parseFloat(n)||0).toFixed(2)}
+function initials(n){return (n||'?').split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2)}
+function toast(m,ok=true){const t=document.getElementById('toast');t.textContent=m;t.style.background=ok?'#1e293b':'#dc2626';t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
+
+async function api(params){
+  const url=API+'?'+new URLSearchParams(params);
+  // retry 3 বার
+  for(let attempt=1;attempt<=3;attempt++){
+    try{
+      const ctrl=new AbortController();
+      const timer=setTimeout(()=>ctrl.abort(),25000);
+      const r=await fetch(url,{method:'GET',redirect:'follow',signal:ctrl.signal});
+      clearTimeout(timer);
+      const text=await r.text();
+      try{return JSON.parse(text);}
+      catch(e){throw new Error('Response error: '+text.slice(0,80));}
+    }catch(e){
+      if(attempt===3)throw e;
+      await new Promise(r=>setTimeout(r,1000*attempt));
+    }
+  }
+}
+
+// ── PAGE NAV ─────────────────────────────────────
+function goPage(p,btn){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
+  document.getElementById('pg-'+p).classList.add('active');
+  btn.classList.add('active');
+  if(p==='home')renderHome();
+  if(p==='sale'){loadEmpSelect();renderTodaySales();}
+  if(p==='report')setRep('today',document.querySelector('.rtab'));
+  if(p==='stock')renderStock();
+  if(p==='emp'){loadOwnerInfo();renderEmps();}
+  if(p==='portal')loadPortalEmpSel();
+}
+
+// ── CALC ──────────────────────────────────────────
+function autoPrice(){const v=document.getElementById('s-prod').value;if(v){document.getElementById('s-sell').value=v.split('|')[1];calc();}}
+function calc(){
+  const qty=parseFloat(document.getElementById('s-qty').value)||0;
+  const buy=parseFloat(document.getElementById('s-buy').value)||0;
+  const sell=parseFloat(document.getElementById('s-sell').value)||0;
+  document.getElementById('r-t').textContent=fmtd(qty*sell);
+  document.getElementById('r-c').textContent=fmtd(qty*buy);
+  document.getElementById('r-p').textContent=fmtd(qty*(sell-buy));
+}
+
+// ── ADD SALE ─────────────────────────────────────
+async function addSale(){
+  const date=document.getElementById('s-date').value;
+  const prod=document.getElementById('s-prod').value;
+  const emp=document.getElementById('s-emp').value;
+  const qty=document.getElementById('s-qty').value;
+  const buy=document.getElementById('s-buy').value||0;
+  const sell=document.getElementById('s-sell').value;
+  const cust=document.getElementById('s-cust').value||'—';
+  if(!date||!prod||!qty||!sell){toast('তারিখ, প্রোডাক্ট, পরিমাণ ও বিক্রয়মূল্য দিন',false);return;}
+  const btn=document.getElementById('sale-btn');
+  btn.textContent='⏳ সেভ হচ্ছে...';btn.disabled=true;
+  try{
+    const res=await api({action:'addSale',date,prod:prod.split('|')[0],emp,qty,buy,sell,cust});
+    if(res.error)throw new Error(res.error);
+    toast('✅ বিক্রি সেভ হয়েছে!');
+    ['s-prod','s-buy','s-sell','s-cust'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('s-qty').value=1;calc();
+    renderTodaySales();renderHome();
+  }catch(e){toast('❌ সেভ হয়নি: '+e.message,false);}
+  btn.textContent='✅ বিক্রি সেভ করুন';btn.disabled=false;
+}
+
+async function delSale(id){
+  if(!confirm('এই এন্ট্রি মুছবেন?'))return;
+  try{
+    await api({action:'delSale',id});
+    toast('মুছে ফেলা হয়েছে');renderTodaySales();renderHome();
+  }catch(e){toast('❌ মুছতে পারেনি',false);}
+}
+
+// ── HOME ──────────────────────────────────────────
+async function renderHome(){
+  try{
+    const [sd,stk]=await Promise.all([api({action:'getSales'}),api({action:'getStock'})]);
+    const sales=sd.sales||[];
+    const t=td();
+    const ts=sales.filter(s=>s.date===t);
+    const tsv=ts.reduce((a,s)=>a+(+s.total),0),tsp=ts.reduce((a,s)=>a+(+s.profit),0),tsq=ts.reduce((a,s)=>a+(+s.qty),0);
+    document.getElementById('hm1').textContent=fmt(tsv);
+    document.getElementById('hm1s').textContent=tsq+' পিস';
+    document.getElementById('hm2').textContent=fmt(tsp);
+    document.getElementById('hm2s').textContent='মার্জিন '+(tsv>0?((tsp/tsv)*100).toFixed(1):0)+'%';
+    const ms=sales.filter(s=>s.date&&s.date.startsWith(t.slice(0,7)));
+    document.getElementById('hm3').textContent=fmt(ms.reduce((a,s)=>a+(+s.total),0));
+    document.getElementById('hm3s').textContent='লাভ '+fmt(ms.reduce((a,s)=>a+(+s.profit),0));
+    document.getElementById('hm4').textContent=sales.length;
+    // stock alerts
+    const alerts=(stk.stock||[]).filter(s=>(+s.qty)<=(+s.restock));
+    const ac=document.getElementById('stock-alert-cnt');
+    if(alerts.length){
+      ac.style.display='inline';ac.textContent=alerts.length+' টি কম!';
+      let ah='';
+      alerts.forEach(s=>{
+        const pct=Math.min(100,((+s.qty)/(+s.restock||1))*100);
+        ah+=`<div class="stock-item"><div style="flex:1"><div style="font-size:13px;font-weight:700">${s.prod}</div><div class="stock-bar"><div class="stock-fill" style="width:${pct}%;background:#ef4444"></div></div></div><span class="pill pr">${s.qty} পিস বাকি</span></div>`;
+      });
+      document.getElementById('home-stock-alert').innerHTML=ah;
+    }else{ac.style.display='none';document.getElementById('home-stock-alert').innerHTML='<div class="empty" style="padding:14px">সব স্টক ঠিক আছে ✅</div>';}
+    // recent
+    const recent=sales.slice(-5).reverse();
+    if(!recent.length){document.getElementById('home-recent').innerHTML='<div class="empty">কোনো লেনদেন নেই</div>';return;}
+    let rh='<table class="tbl"><thead><tr><th>তারিখ</th><th>প্রোডাক্ট</th><th>পিস</th><th>বিক্রি</th><th>লাভ</th></tr></thead><tbody>';
+    recent.forEach(s=>rh+=`<tr><td>${s.date}</td><td><b>${s.prod}</b></td><td>${s.qty}</td><td style="color:#2563eb;font-weight:700">${fmt(s.total)}</td><td><span class="pill ${(+s.profit)>=0?'pg':'pr'}">${fmt(s.profit)}</span></td></tr>`);
+    document.getElementById('home-recent').innerHTML=rh+'</tbody></table>';
+  }catch(e){document.getElementById('home-recent').innerHTML='<div class="empty">⚠️ লোড হয়নি। ইন্টারনেট চেক করুন।</div>';}
+}
+
+// ── TODAY SALES ───────────────────────────────────
+async function renderTodaySales(){
+  document.getElementById('today-list').innerHTML='<div class="loading"><div class="spin"></div></div>';
+  try{
+    const d=await api({action:'getSales',date:td()});
+    const list=d.sales||[];
+    document.getElementById('today-cnt').textContent=list.length;
+    if(!list.length){document.getElementById('today-list').innerHTML='<div class="empty">আজ কোনো বিক্রি নেই</div>';return;}
+    let h='<table class="tbl"><thead><tr><th>প্রোডাক্ট</th><th>পিস</th><th>খরচ</th><th>বিক্রি</th><th>লাভ</th><th></th></tr></thead><tbody>';
+    list.forEach(s=>h+=`<tr><td><b>${s.prod}</b><br><span style="font-size:10px;color:var(--muted)">${s.emp}·${s.cust}</span></td><td>${s.qty}</td><td style="color:var(--red)">${fmt(s.cost)}</td><td style="color:#2563eb;font-weight:700">${fmt(s.total)}</td><td><span class="pill ${(+s.profit)>=0?'pg':'pr'}">${fmt(s.profit)}</span></td><td><button class="btn-sm btn-del" onclick="delSale('${s.id}')">✕</button></td></tr>`);
+    document.getElementById('today-list').innerHTML=h+'</tbody></table>';
+  }catch(e){document.getElementById('today-list').innerHTML='<div class="empty">⚠️ লোড হয়নি</div>';}
+}
+
+// ── REPORT ────────────────────────────────────────
+async function setRep(period,btn){
+  document.querySelectorAll('.rtab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
+  document.getElementById('rep-summary').innerHTML='<div class="loading" style="grid-column:1/-1"><div class="spin"></div></div>';
+  document.getElementById('rep-prod').innerHTML='<div class="loading"><div class="spin"></div></div>';
+  document.getElementById('rep-emp').innerHTML='';
+  try{
+    const d=await api({action:'getSales'});
+    let list=d.sales||[];
+    const t=td();
+    if(period==='today')list=list.filter(s=>s.date===t);
+    else if(period==='week'){const ws=new Date();ws.setDate(ws.getDate()-7);list=list.filter(s=>s.date>=ws.toISOString().split('T')[0]);}
+    else if(period==='month')list=list.filter(s=>s.date&&s.date.startsWith(t.slice(0,7)));
+    const ts=list.reduce((a,s)=>a+(+s.total),0),tc=list.reduce((a,s)=>a+(+s.cost),0),tp=list.reduce((a,s)=>a+(+s.profit),0),tq=list.reduce((a,s)=>a+(+s.qty),0);
+    document.getElementById('rep-summary').innerHTML=`
+      <div class="si"><div class="sl">মোট বিক্রি</div><div class="sv" style="color:#2563eb">${fmt(ts)}</div></div>
+      <div class="si"><div class="sl">মালের খরচ</div><div class="sv" style="color:var(--red)">${fmt(tc)}</div></div>
+      <div class="si"><div class="sl">মোট লাভ</div><div class="sv" style="color:var(--green)">${fmt(tp)}</div></div>
+      <div class="si"><div class="sl">মোট পিস</div><div class="sv" style="color:var(--purple)">${tq}</div></div>
+      <div class="si"><div class="sl">এন্ট্রি</div><div class="sv">${list.length}</div></div>
+      <div class="si"><div class="sl">মার্জিন</div><div class="sv" style="color:var(--green)">${ts>0?((tp/ts)*100).toFixed(1):0}%</div></div>`;
+    const bp={};
+    list.forEach(s=>{if(!bp[s.prod])bp[s.prod]={qty:0,total:0,cost:0,profit:0};bp[s.prod].qty+=(+s.qty);bp[s.prod].total+=(+s.total);bp[s.prod].cost+=(+s.cost);bp[s.prod].profit+=(+s.profit);});
+    let ph='';
+    Object.entries(bp).sort((a,b)=>b[1].total-a[1].total).forEach(([p,v])=>ph+=`<tr><td><b>${p}</b></td><td>${v.qty}</td><td style="color:var(--red)">${fmt(v.cost)}</td><td style="color:#2563eb">${fmt(v.total)}</td><td><span class="pill ${v.profit>=0?'pg':'pr'}">${fmt(v.profit)}</span></td></tr>`);
+    document.getElementById('rep-prod').innerHTML=ph?'<table class="tbl"><thead><tr><th>প্রোডাক্ট</th><th>পিস</th><th>খরচ</th><th>বিক্রি</th><th>লাভ</th></tr></thead><tbody>'+ph+'</tbody></table>':'<div class="empty">ডেটা নেই</div>';
+    const be={};
+    list.forEach(s=>{if(!be[s.emp])be[s.emp]={total:0,profit:0,cnt:0};be[s.emp].total+=(+s.total);be[s.emp].profit+=(+s.profit);be[s.emp].cnt++;});
+    let eh='';
+    Object.entries(be).sort((a,b)=>b[1].total-a[1].total).forEach(([e,v])=>eh+=`<tr><td><b>${e}</b></td><td>${v.cnt}</td><td style="color:#2563eb">${fmt(v.total)}</td><td><span class="pill ${v.profit>=0?'pg':'pr'}">${fmt(v.profit)}</span></td></tr>`);
+    document.getElementById('rep-emp').innerHTML=eh?'<table class="tbl"><thead><tr><th>কর্মচারী</th><th>এন্ট্রি</th><th>বিক্রি</th><th>লাভ</th></tr></thead><tbody>'+eh+'</tbody></table>':'<div class="empty">ডেটা নেই</div>';
+  }catch(e){document.getElementById('rep-summary').innerHTML='<div class="empty" style="grid-column:1/-1">⚠️ লোড হয়নি</div>';}
+}
+
+// ── STOCK ─────────────────────────────────────────
+let stockData=[];
+async function renderStock(){
+  document.getElementById('stock-list').innerHTML='<div class="loading"><div class="spin"></div></div>';
+  try{
+    const d=await api({action:'getStock'});
+    stockData=d.stock||[];
+    if(!stockData.length){document.getElementById('stock-list').innerHTML='<div class="empty">স্টক ডেটা নেই। Apps Script এ setupSheets() চালান।</div>';return;}
+    let h='';
+    stockData.forEach((s,i)=>{
+      const pct=Math.min(100,((+s.qty)/(Math.max(+s.restock,1)+20))*100);
+      const col=(+s.qty)<=(+s.restock)?'#ef4444':(+s.qty)<=(+s.restock)*2?'#f59e0b':'#10b981';
+      h+=`<div class="stock-item">
+        <div style="flex:1;margin-right:10px">
+          <div style="font-size:13px;font-weight:700">${s.prod} <span style="font-size:11px;color:var(--muted)">৳${s.price}</span></div>
+          <div class="stock-bar"><div class="stock-fill" style="width:${pct}%;background:${col}"></div></div>
+        </div>
+        <div style="text-align:right;min-width:130px">
+          <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-bottom:4px">
+            <span style="font-size:11px;color:var(--muted)">স্টক:</span>
+            <input type="number" value="${s.qty}" min="0" id="stock-qty-${i}" style="width:65px;padding:5px 7px;font-size:13px;font-weight:700;text-align:center;border-radius:6px;border:1.5px solid var(--border)">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;justify-content:flex-end">
+            <span style="font-size:10px;color:var(--muted)">সতর্কতা:</span>
+            <input type="number" value="${s.restock}" min="0" id="stock-re-${i}" style="width:50px;padding:5px 6px;font-size:11px;text-align:center;border-radius:6px;border:1.5px solid var(--border)">
+          </div>
+        </div>
+      </div>`;
+    });
+    document.getElementById('stock-list').innerHTML=h;
+  }catch(e){document.getElementById('stock-list').innerHTML='<div class="empty">⚠️ লোড হয়নি</div>';}
+}
+
+async function saveStock(){
+  const btn=document.getElementById('stock-save-btn');
+  btn.textContent='⏳ সেভ হচ্ছে...';btn.disabled=true;
+  try{
+    const promises=stockData.map((s,i)=>{
+      const qty=document.getElementById('stock-qty-'+i).value;
+      const re=document.getElementById('stock-re-'+i).value;
+      return api({action:'updateStock',prod:s.prod,qty,restock:re});
+    });
+    await Promise.all(promises);
+    toast('✅ স্টক সেভ হয়েছে');
+    renderStock();
+  }catch(e){toast('❌ সেভ হয়নি',false);}
+  btn.textContent='💾 স্টক সেভ করুন';btn.disabled=false;
+}
+
+// ── EMPLOYEES ─────────────────────────────────────
+async function loadEmpSelect(){
+  try{
+    const d=await api({action:'getEmps'});
+    let opts='<option value="নিজে">নিজে</option>';
+    (d.emps||[]).forEach(e=>opts+=`<option value="${e.name}">${e.name} (${e.role})</option>`);
+    document.getElementById('s-emp').innerHTML=opts;
+  }catch(e){}
+}
+
+async function addEmp(){
+  const name=document.getElementById('e-name').value.trim();
+  const role=document.getElementById('e-role').value;
+  const phone=document.getElementById('e-phone').value.trim();
+  const area=document.getElementById('e-area').value.trim();
+  const pin=document.getElementById('e-pin').value.trim();
+  if(!name){toast('নাম দিন',false);return;}
+  if(!pin||pin.length!==4||isNaN(pin)){toast('৪ সংখ্যার পিন দিন',false);return;}
+  const btn=document.getElementById('emp-add-btn');
+  btn.textContent='⏳ যোগ হচ্ছে...';btn.disabled=true;
+  try{
+    const res=await api({action:'addEmp',name,role,phone,area,pin});
+    if(res.error)throw new Error(res.error);
+    toast('✅ কর্মচারী যোগ হয়েছে');
+    ['e-name','e-phone','e-area','e-pin'].forEach(id=>document.getElementById(id).value='');
+    renderEmps();
+  }catch(e){toast('❌ যোগ হয়নি: '+e.message,false);}
+  btn.textContent='+ কর্মচারী যোগ করুন';btn.disabled=false;
+}
+
+async function delEmp(id){
+  if(!confirm('এই কর্মচারী মুছবেন?'))return;
+  try{await api({action:'delEmp',id});toast('মুছে ফেলা হয়েছে');renderEmps();}
+  catch(e){toast('❌ মুছতে পারেনি',false);}
+}
+
+async function renderEmps(){
+  document.getElementById('emp-list').innerHTML='<div class="loading"><div class="spin"></div></div>';
+  try{
+    const [ed,sd]=await Promise.all([api({action:'getEmps'}),api({action:'getSales'})]);
+    const emps=ed.emps||[];const sales=sd.sales||[];
+    if(!emps.length){document.getElementById('emp-list').innerHTML='<div class="empty">কোনো কর্মচারী নেই</div>';return;}
+    let h='';
+    emps.forEach((e,i)=>{
+      const es=sales.filter(s=>s.emp===e.name);
+      const et=es.reduce((a,s)=>a+(+s.total),0),ep=es.reduce((a,s)=>a+(+s.profit),0);
+      const ownerPhone=localStorage.getItem('owner_phone')||'';
+      h+=`<div class="ecard">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="eavatar" style="background:${COLORS[i%COLORS.length]}">${initials(e.name)}</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700">${e.name}</div>
+            <div style="font-size:11px;color:var(--muted)">${e.role} · ${e.area||'—'}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
+              <span style="font-size:10px;color:#94a3b8">📞 ${e.phone||'—'} · পিন: ${e.pin}</span>
+              ${e.phone?`<a href="tel:${e.phone}" class="btn-sm btn-save" style="font-size:10px;padding:2px 7px;text-decoration:none">কল</a>`:''}
+            </div>
+          </div>
+          <button class="btn-sm btn-del" onclick="delEmp('${e.id}')">মুছুন</button>
+        </div>
+        <hr style="margin:9px 0">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;text-align:center">
+          <div><div style="font-size:13px;font-weight:800;color:var(--blue)">${fmt(et)}</div><div style="font-size:9px;color:var(--muted)">মোট বিক্রি</div></div>
+          <div><div style="font-size:13px;font-weight:800;color:var(--green)">${fmt(ep)}</div><div style="font-size:9px;color:var(--muted)">মোট লাভ</div></div>
+          <div><div style="font-size:13px;font-weight:800">${es.length}</div><div style="font-size:9px;color:var(--muted)">এন্ট্রি</div></div>
+        </div>
+      </div>`;
+    });
+    document.getElementById('emp-list').innerHTML=h;
+  }catch(e){document.getElementById('emp-list').innerHTML='<div class="empty">⚠️ লোড হয়নি</div>';}
+}
+
+// ── PORTAL ────────────────────────────────────────
+async function loadPortalEmpSel(){
+  try{
+    const d=await api({action:'getEmps'});
+    let opts='<option value="">— বেছে নিন —</option>';
+    (d.emps||[]).forEach(e=>opts+=`<option value="${e.id}|${e.pin}|${e.name}|${e.role}|${e.area}">${e.name} (${e.role})</option>`);
+    document.getElementById('pt-emp-sel').innerHTML=opts;
+    const phone=localStorage.getItem('owner_phone')||'';
+    if(phone){document.getElementById('portal-call-link').href='tel:'+phone;document.getElementById('portal-owner-call').style.display='block';}
+  }catch(e){}
+}
+
+let portalEmp=null;
+function portalLogin(){
+  const sel=document.getElementById('pt-emp-sel').value;
+  const pin=document.getElementById('pt-pin').value;
+  if(!sel){toast('নাম বেছে নিন',false);return;}
+  const parts=sel.split('|');
+  if(parts[1]!==pin){toast('❌ ভুল পিন!',false);return;}
+  portalEmp={id:parts[0],name:parts[2],role:parts[3],area:parts[4]};
+  document.getElementById('portal-login').style.display='none';
+  document.getElementById('portal-main').style.display='block';
+  document.getElementById('pt-name').textContent=portalEmp.name;
+  document.getElementById('pt-role').textContent=portalEmp.role+' · '+(portalEmp.area||'');
+  const phone=localStorage.getItem('owner_phone')||'';
+  if(phone)document.getElementById('pt-call-btn').href='tel:'+phone;
+  else document.getElementById('pt-call-btn').style.display='none';
+  renderPortalSales();
+}
+function portalLogout(){portalEmp=null;document.getElementById('portal-login').style.display='block';document.getElementById('portal-main').style.display='none';document.getElementById('pt-pin').value='';}
+function ptAutoPrice(){const v=document.getElementById('pt-prod').value;if(v){document.getElementById('pt-sell').value=v.split('|')[1];ptCalc();}}
+function ptCalc(){
+  const qty=parseFloat(document.getElementById('pt-qty').value)||0;
+  const buy=parseFloat(document.getElementById('pt-buy').value)||0;
+  const sell=parseFloat(document.getElementById('pt-sell').value)||0;
+  document.getElementById('pt-rt').textContent=fmtd(qty*sell);
+  document.getElementById('pt-rc').textContent=fmtd(qty*buy);
+  document.getElementById('pt-rp').textContent=fmtd(qty*(sell-buy));
+}
+async function ptSubmit(){
+  if(!portalEmp)return;
+  const prod=document.getElementById('pt-prod').value;
+  const qty=document.getElementById('pt-qty').value;
+  const buy=document.getElementById('pt-buy').value||0;
+  const sell=document.getElementById('pt-sell').value;
+  const cust=document.getElementById('pt-cust').value||'—';
+  if(!prod||!qty||!sell){toast('প্রোডাক্ট, পরিমাণ ও বিক্রয়মূল্য দিন',false);return;}
+  const btn=document.getElementById('pt-btn');btn.textContent='⏳ পাঠানো হচ্ছে...';btn.disabled=true;
+  try{
+    const res=await api({action:'addSale',date:td(),prod:prod.split('|')[0],emp:portalEmp.name,qty,buy,sell,cust});
+    if(res.error)throw new Error(res.error);
+    toast('✅ আপডেট পাঠানো হয়েছে!');
+    ['pt-prod','pt-buy','pt-sell','pt-cust'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('pt-qty').value=1;ptCalc();renderPortalSales();
+  }catch(e){toast('❌ পাঠানো হয়নি: '+e.message,false);}
+  btn.textContent='📤 আপডেট পাঠান';btn.disabled=false;
+}
+async function renderPortalSales(){
+  if(!portalEmp)return;
+  document.getElementById('pt-my-sales').innerHTML='<div class="loading"><div class="spin"></div></div>';
+  try{
+    const d=await api({action:'getSales',date:td()});
+    const list=(d.sales||[]).filter(s=>s.emp===portalEmp.name);
+    if(!list.length){document.getElementById('pt-my-sales').innerHTML='<div class="empty">আজ কোনো বিক্রি নেই</div>';return;}
+    let h='<table class="tbl"><thead><tr><th>প্রোডাক্ট</th><th>পিস</th><th>বিক্রি/পিস</th><th>মোট</th></tr></thead><tbody>';
+    list.forEach(s=>h+=`<tr><td><b>${s.prod}</b><br><span style="font-size:10px;color:var(--muted)">${s.cust}</span></td><td>${s.qty}</td><td>${fmt(s.sell)}</td><td style="color:#2563eb;font-weight:700">${fmt(s.total)}</td></tr>`);
+    const mt=list.reduce((a,s)=>a+(+s.total),0);
+    h+=`</tbody><tfoot><tr><td colspan="3" style="font-weight:700;padding:8px 5px">মোট</td><td style="color:#2563eb;font-weight:800;padding:8px 5px">${fmt(mt)}</td></tr></tfoot></table>`;
+    document.getElementById('pt-my-sales').innerHTML=h;
+  }catch(e){document.getElementById('pt-my-sales').innerHTML='<div class="empty">⚠️ লোড হয়নি</div>';}
+}
+
+// INIT
+loadOwnerInfo();
+renderHome();
+loadEmpSelect();
+</script>
+</body>
+</html>
